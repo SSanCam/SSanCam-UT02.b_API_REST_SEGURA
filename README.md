@@ -116,6 +116,259 @@ Relaciones:
 <br>
 <br>
 
-# 4. Diagrama Entidad/Relación
+- # Diagrama Entidad/Relación
 
-![Diagrama Entidad/Relación](./src/main/resources/images/UT02_API_REST_SEGURA.jpg)
+```plantuml
+@startuml
+entity "Usuarios" as Usuarios {
+    + id_usuario : INT
+    + nombre : VARCHAR(100)
+    + email : VARCHAR(255)
+    + telefono : VARCHAR(9)
+    + contraseña : VARCHAR(255)
+    + rol : ENUM
+}
+
+entity "Animales" as Animales {
+    + id_animal : INT
+    + nombre : VARCHAR(100)
+    + tipo_animal : ENUM
+    + estado : ENUM
+}
+
+entity "Adopciones" as Adopciones {
+    + id_adopcion : INT
+    + id_usuario : INT
+    + id_animal : INT
+    + fecha_adopcion : DATE
+    + observaciones : TEXT
+}
+
+Usuarios ||--o{ Adopciones : "1:N"
+Animales ||--|| Adopciones : "1:1"
+@enduml
+
+
+<hr>
+<br>
+<br>
+
+# 3. Descripción de los *endpoints*. 
+
+En esta sección se detallan los diferentes endpoints disponibles en la API REST del proyecto Refugio Kimba. Cada uno de ellos está diseñado para manejar las operaciones relacionadas con las principales entidades del sistema, como usuarios, animales y adopciones.
+
+Para cada endpoint se especifican:
+
+- La operación que realiza (por ejemplo, creación, lectura, actualización o eliminación).
+- Los roles que tienen acceso a dicho endpoint.
+- Las restricciones aplicables, como requisitos de autenticación o permisos específicos.
+- El formato de los datos de entrada y salida.
+- Las posibles excepciones y los códigos de estado HTTP asociados.
+
+## a. Usuarios.
+
+Los ususarios tendran un método C.R.U.D aunque no todos los tipos de usuarios tendrán acceso a todos los métodos, dependerán del *rol* que tengan.
+
+- ### C.R.U.D
+
+-`POST /usuarios/` : Permiten crearse nuevos usuarios.
+- **RUTA PÚBLICA** ✅
+  - **Entrada**: JSON con `nombre`, `email`, `telefono`, `contraseña` y `rol`
+  - **Restricciones**: Método accesible sólo a los usuarios *administradores*.
+  - **Salida**: 201: CREATED -> Usuario creado con éxito. Devuelve el JSON con los datos del usuario creado, incluyendo el `id` que se crea de forma automática.
+  - **Excepciones**: 400: BAD_REQUEST -> Cuando los datos son inválidos o faltantes.
+
+
+
+- `GET /usuarios/{id}`: Permite a los *administradores* obtener la información de un usuario concreto a través de su ID.
+  - **RUTA PÚBLICA** ❌
+  - **Entrada**: `ruta` + `id` del usuario.
+  - **Restricciones**: Sólo los usuarios `administradores` tienen permiso para obtener ésta información.
+  - **Salida**: 200: OK -> Devuelve el JSON con los datos del usuario.
+  - **Excepciones**: 400: BAD_REQUEST -> Dátos inválidos.
+
+
+- `GET /usuarios?rol=ROL` : Obtiene los datos de todos los usuarios que compartan el mismo tipo de rol.
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: `ruta` + `rol=ROL` (ej : `GET /usuarios?rol=generico`)
+    - **Restricciones**: Sólo los usuarios `administradores` tienen permiso para obtener ésta información.
+    - **Salida**: 200: OK -> JSON con los datos de todos los usuarios encontrados.
+    - **Excepciones**: 
+      - 400: BAD_REQUEST -> Si el valor del *rol* es inválido. 
+      - 404 NOT_FOUND -> El *rol* es válido, pero no se encuentra ningún usuario que cumpla el requisito.
+
+
+- `PUT /usuarios/{id}`: Actualiza la información de un usuario.
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: JSON con los campos a actualizar.
+    - **Restricciones**: Sólo usuarios *administradores* o el propio usuario pueden modificar éstos datos.
+    - **Salida**: 200 OK: JSON con los datos del usuario actualizado.
+    - **Excepciones**: 400 Bad Request: Datos inválidos.
+
+- `DELETE /usuarios/{id}`:
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: `ruta` + `id` del usuario a eliminar.
+    - **Restricciones**: Sólo usuarios *administradores* pueden eliminar usuarios de la base de datos.
+    - **Salida**: 200 OK: Mensaje de confirmación de eliminación.
+    - **Excepciones**: 404 Not Found: Usuario no encontrado.
+
+- ### **Autenticación**
+- `POST  /usuarios/login`
+    - **RUTA PÚBLICA** ✅
+    - **Entrada**: JSON con `email` y `contraseña`.
+    - **Restricciones**: Credenciales válidas son requeridas para autenticación.
+    - **Salida**: 200 OK: JSON con el token JWT y datos básicos del usuario.
+    - **Excepciones**: 401 Unauthorized: Credenciales incorrectas.
+
+- ### **Registro**
+
+
+- `POST /usuarios/register/`
+    - **RUTA PÚBLICA** ✅
+    - **Entrada**: JSON con nombre, email, telefono, contraseña y rol.
+    - **Restricciones**: Los usuarios con el rol genérico solo pueden crear usuarios del mismo rol. Los usuarios administradores pueden crear usuarios con cualquier rol.
+    - **Salida**: 201 Created: Devuelve JSON con los datos del usuario creado.
+    - **Excepciones**: 400 Bad Request: Datos inválidos o faltantes.
+
+<hr>
+
+## b. Animales.
+
+- `POST /animales/`: Permite registrar un nuevo animal en el refugio.
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: JSON con nombre, tipo_animal (perro, gato), estado, etc.
+    - **Restricciones**: Solo administradores pueden registrar animales.
+    - **Salida**: 201 Created: JSON con los datos del animal registrado.
+    - **Excepciones**: 400 Bad Request: Datos inválidos o faltantes.
+
+- `GET /animales/{id}`: Permite obtener la información de un animal específico.
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: 	`Ruta` con el `ID` del animal.
+    - **Restricciones**: Sólo administradores.
+    - **Salida**: 200 OK: JSON con los datos del animal solicitado.
+    - **Excepciones**: 404 Not Found: Animal no encontrado.
+
+- `PUT /animales/{id}`: Permite actualizar la información de un animal registrado.
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: JSON con los datos a actualizar.
+    - **Restricciones**: Solo administradores pueden modificar animales.
+    - **Salida**: 200 OK: JSON con los datos actualizados del animal.
+    - **Excepciones**: 400 Bad Request: Datos inválidos.
+
+- `GET /animales?estado={estado}`: Obtiene una lista de animales según su estado (en adopción, apadrinado, etc.).
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: `ruta` + estado por el que se quiere fiiltrar. Ej: `GET animales?estado=apadrionado`
+    - **Restricciones**: Sólo administradores.
+    - **Salida**: 200 OK: JSON con la lista de animales filtrados por estado.
+    - **Excepciones**: 404 Not Found: No se encuentan animales con el estado indicado.
+                       400 Bad Request: Datos inválidos.
+
+<hr>
+
+## c. Adopciones.
+
+- `POST /adopciones/`: Permite registrar una nueva adopción en el sistema.
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: JSON con id_usuario, id_animal, fecha_adopcion, y observaciones.
+    - **Restricciones**: Solo administradores pueden registrar adopciones.
+    - **Salida**: 201 Created: JSON con los datos de la adopción registrada.
+    - **Excepciones**: 400 Bad Request: Datos inválidos.
+
+
+- `GET /adopciones/`: Permite obtener una lista de todas las adopciones registradas.
+    - **RUTA PÚBLICA** ❌
+    - **Entrada**: Ninguna
+    - **Restricciones**: Solo administradores pueden acceder.
+    - **Salida**: 200 OK: JSON con la lista de adopciones.
+    - **Excepciones**: 404 Not Found: Registros no encontrados.
+
+<hr>
+<br>
+<br>
+
+ ### Excepciones genéricas
+Los errores más comunes en el manejo de datos con la base de datos incluyen problemas de validación, autenticación, permisos insuficientes, fallos internos del servidor, etc.
+Los más comunes que nos encontraremos son:
+
+- `400 BAD_REQUEST`: Datos inválidos o faltantes.
+- `401 UNAUTHORIZED`: Falta de autenticación o token inválido.
+- `403 FORBIDDEN`: Permisos insuficientes para realizar esta acción.
+- `404 NOT_FOUND`: Recurso no encontrado.
+- `405 METHOD_NOT_ALLOWED`: Método HTTP no permitido.
+- `409 CONFLICT`: Conflicto con el estado actual del recurso.
+- `422 UNPROCESSABLE_ENTITY`: Datos correctos pero no procesables.
+- `429 TOO_MANY_REQUESTS`: Límite de solicitudes excedido.
+- `500 INTERNAL_SERVER_ERROR`: Error inesperado en el servidor.
+
+<hr>
+<br>
+<br>
+
+## 4. Lógica de negocio.
+
+### Usuarios
+- **Registro**:
+  - Los usuarios genéricos solo pueden registrarse a sí mismos o a otros usuarios genéricos.
+  - Solo los administradores pueden registrar usuarios con roles avanzados, como voluntarios o padrinos.
+  - Se valida que los datos como el email y el teléfono sean únicos en la base de datos.
+- **Modificación**:
+  - Los usuarios solo pueden modificar sus propios datos, a excepción de su rol.
+  - Los administradores pueden modificar cualquier usuario.
+- **Eliminación**:
+  - Los administradores son los únicos con permisos para eliminar usuarios. Sin embargo, se ofrece un endpoint dedicado para que un usuario pueda solicitar la eliminación de su cuenta, respetando las políticas de privacidad.
+
+### Animales
+- **Registro**:
+  - Solo los administradores pueden registrar nuevos animales en el sistema.
+  - Los datos como el estado (en adopción, apadrinado, etc.) y el tipo de animal (perro, gato) son validados para cumplir con las reglas predefinidas.
+- **Modificación**:
+  - El estado de un animal solo puede ser actualizado por un administrador.
+  - Un animal que está adoptado no puede volver a cambiar su estado a "en adopción".
+- **Consulta**:
+  - Los administradores pueden filtrar animales por tipo o estado para facilitar la gestión interna.
+
+### Adopciones
+- **Registro**:
+  - Solo los administradores pueden registrar adopciones.
+  - Antes de realizar una adopción, se valida que el animal esté en el estado "en adopción".
+  - Un usuario no puede adoptar más de una vez al mismo animal.
+- **Consulta**:
+  - Los administradores tienen acceso a todos los registros de adopción.
+
+### Validaciones generales
+- Se asegura que los datos enviados en cada solicitud cumplan con los formatos esperados.
+- La existencia de recursos referenciados (como id_usuario o id_animal) es verificada antes de procesar cualquier solicitud para evitar inconsistencias.
+
+<hr>
+<br>
+<br>
+
+## 5. Restricciones de Seguridad.
+
+Con estas medidas, se busca ofrecer un entorno seguro para todos los usuarios del sistema, protegiendo tanto la integridad de los datos como la privacidad de los usuarios
+El proyecto utiliza diversas medidas de seguridad para proteger los datos y garantizar un acceso controlado:
+
+### 1. Autenticación mediante JWT:
+- Los usuarios deben autenticarse con sus credenciales (email y contraseña) para obtener un token JWT.
+- El token es necesario para acceder a rutas privadas y realizar operaciones autorizadas.
+
+### 2. Roles y permisos
+- Cada usuario tiene asignado un rol que define sus permisos dentro del sistema.
+- Los roles determinan qué endpoints y operaciones están disponibles para cada tipo de usuario.
+
+### 3. Validación de entradas
+- Se valida que los datos enviados por el cliente sean correctos, completos y estén en el formato esperado.
+- Se utilizan reglas de validación específicas para evitar datos maliciosos o inconsistentes.
+
+### 4. Restricción de métodos HTTP
+- Cada endpoint está configurado para aceptar solo los métodos HTTP necesarios (por ejemplo, GET, POST, PUT, DELETE).
+
+### 5. Control de acceso a recursos
+- Los usuarios solo pueden acceder a los datos que les corresponden según sus permisos. Por ejemplo, un usuario genérico no puede acceder a los datos de otros usuarios o animales.
+
+### 6. Cifrado
+- Las contraseñas de los usuarios se almacenan en la base de datos como hashes cifrados.
+- Toda la comunicación entre cliente y servidor debe realizarse a través de HTTPS.
+
+
+
