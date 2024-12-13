@@ -147,7 +147,7 @@ entity "Adopciones" as Adopciones {
 Usuarios ||--o{ Adopciones : "1:N"
 Animales ||--|| Adopciones : "1:1"
 @enduml
-
+```
 
 <hr>
 <br>
@@ -179,14 +179,13 @@ Los ususarios tendran un método C.R.U.D aunque no todos los tipos de usuarios t
   - **Excepciones**: 400: BAD_REQUEST -> Cuando los datos son inválidos o faltantes.
 
 
-
 - `GET /usuarios/{id}`: Permite a los *administradores* obtener la información de un usuario concreto a través de su ID.
   - **RUTA PÚBLICA** ❌
   - **Entrada**: `ruta` + `id` del usuario.
   - **Restricciones**: Sólo los usuarios `administradores` tienen permiso para obtener ésta información.
   - **Salida**: 200: OK -> Devuelve el JSON con los datos del usuario.
   - **Excepciones**: 400: BAD_REQUEST -> Dátos inválidos.
-
+  - 
 
 - `GET /usuarios?rol=ROL` : Obtiene los datos de todos los usuarios que compartan el mismo tipo de rol.
     - **RUTA PÚBLICA** ❌
@@ -205,12 +204,14 @@ Los ususarios tendran un método C.R.U.D aunque no todos los tipos de usuarios t
     - **Salida**: 200 OK: JSON con los datos del usuario actualizado.
     - **Excepciones**: 400 Bad Request: Datos inválidos.
 
+
 - `DELETE /usuarios/{id}`:
     - **RUTA PÚBLICA** ❌
     - **Entrada**: `ruta` + `id` del usuario a eliminar.
     - **Restricciones**: Sólo usuarios *administradores* pueden eliminar usuarios de la base de datos.
     - **Salida**: 200 OK: Mensaje de confirmación de eliminación.
     - **Excepciones**: 404 Not Found: Usuario no encontrado.
+
 
 - ### **Autenticación**
 - `POST  /usuarios/login`
@@ -241,6 +242,7 @@ Los ususarios tendran un método C.R.U.D aunque no todos los tipos de usuarios t
     - **Salida**: 201 Created: JSON con los datos del animal registrado.
     - **Excepciones**: 400 Bad Request: Datos inválidos o faltantes.
 
+
 - `GET /animales/{id}`: Permite obtener la información de un animal específico.
     - **RUTA PÚBLICA** ❌
     - **Entrada**: 	`Ruta` con el `ID` del animal.
@@ -248,12 +250,14 @@ Los ususarios tendran un método C.R.U.D aunque no todos los tipos de usuarios t
     - **Salida**: 200 OK: JSON con los datos del animal solicitado.
     - **Excepciones**: 404 Not Found: Animal no encontrado.
 
+
 - `PUT /animales/{id}`: Permite actualizar la información de un animal registrado.
     - **RUTA PÚBLICA** ❌
     - **Entrada**: JSON con los datos a actualizar.
     - **Restricciones**: Solo administradores pueden modificar animales.
     - **Salida**: 200 OK: JSON con los datos actualizados del animal.
     - **Excepciones**: 400 Bad Request: Datos inválidos.
+
 
 - `GET /animales?estado={estado}`: Obtiene una lista de animales según su estado (en adopción, apadrinado, etc.).
     - **RUTA PÚBLICA** ❌
@@ -286,40 +290,142 @@ Los ususarios tendran un método C.R.U.D aunque no todos los tipos de usuarios t
 <br>
 <br>
 
+### Excepciones genéricas
+
+Los errores más comunes en el manejo de datos con la base de datos incluyen problemas de validación, autenticación, permisos insuficientes, fallos internos del servidor, etc.
+Los más comunes que nos encontraremos son:
+
+- `400 BAD_REQUEST`: Datos inválidos o faltantes.
+- `401 UNAUTHORIZED`: Falta de autenticación o token inválido.
+- `403 FORBIDDEN`: Permisos insuficientes para realizar esta acción.
+- `404 NOT_FOUND`: Recurso no encontrado.
+- `405 METHOD_NOT_ALLOWED`: Método HTTP no permitido.
+- `409 CONFLICT`: Conflicto con el estado actual del recurso.
+- `422 UNPROCESSABLE_ENTITY`: Datos correctos pero no procesables.
+- `429 TOO_MANY_REQUESTS`: Límite de solicitudes excedido.
+- `500 INTERNAL_SERVER_ERROR`: Error inesperado en el servidor.
+
+En caso de que se produzca una excepción, la API devolverá una respuesta con el siguiente formato JSON:
+```json
+{
+  "mensaje": "El recurso solicitado no existe.",
+  "uri": "/usuarios/99"
+}
+```
+
+<hr>
+<br>
+<br>
+
 ## 4. Lógica de negocio.
 
 ### Usuarios
-- **Registro**:
-  - Los usuarios genéricos solo pueden registrarse a sí mismos o a otros usuarios genéricos.
-  - Solo los administradores pueden registrar usuarios con roles avanzados, como voluntarios o padrinos.
-  - Se valida que los datos como el email y el teléfono sean únicos en la base de datos.
-- **Modificación**:
-  - Los usuarios solo pueden modificar sus propios datos, a excepción de su rol.
-  - Los administradores pueden modificar cualquier usuario.
-- **Eliminación**:
-  - Los administradores son los únicos con permisos para eliminar usuarios. Sin embargo, se ofrece un endpoint dedicado para que un usuario pueda solicitar la eliminación de su cuenta, respetando las políticas de privacidad.
+1. Crear usuario (`POST /usuarios/`):
+
+   - Permite a los administradores crear nuevos usuarios.
+   - Validaciones:
+     - El email y teléfono deben ser únicos.
+     - Los datos enviados deben cumplir con el formato requerido.
+     - Restricciones: Los usuarios genéricos no tienen acceso a este endpoint.
+
+
+2. Consultar usuario por ID (`GET /usuarios/{id}`):
+
+- Permite a los administradores obtener información detallada de un usuario específico.
+- Validaciones:
+  - Se verifica que el ID proporcionado exista en la base de datos.
+  - Restricciones: Solo accesible por administradores.
+
+3. Consultar usuarios por rol (`GET /usuarios?rol={rol}`):
+
+- Permite filtrar usuarios según su rol.
+- Validaciones:
+  - El valor del rol debe ser válido (genérico, administrador, etc.).
+  - Restricciones: Solo accesible por administradores.
+
+4. Modificar usuario (`PUT /usuarios/{id}`):
+
+- Permite actualizar la información de un usuario.
+- Validaciones:
+  - Solo el propio usuario o un administrador puede modificar los datos.
+  - No se permite que un usuario modifique su propio rol.
+  - Restricciones: Rol limitado según permisos.
+
+5. Eliminar usuario (`DELETE /usuarios/{id}`):
+
+- Permite a los administradores eliminar usuarios.
+- Validaciones:
+  - El ID debe existir en la base de datos.
+  - Se valida que el usuario no tenga dependencias activas (como adopciones no finalizadas).
+
+6. Iniciar sesión (`POST /usuarios/login`):
+
+- Autentica a un usuario mediante email y contraseña.
+- Proceso:
+  - Si las credenciales son válidas, genera un token JWT.
+  - El token contiene información básica del usuario y permisos.
+- Validaciones:
+  - Se verifica que el email y la contraseña coincidan.
+  - Se verifica que el usuario no esté inactivo o eliminado.
+
+7. Registro (`POST /usuarios/register`):
+
+- Permite a los usuarios registrarse en el sistema.
+- Validaciones:
+  - Los usuarios genéricos solo pueden registrar usuarios de su mismo rol.
+  - Los administradores pueden registrar usuarios con cualquier rol.
+  - Los datos enviados deben cumplir con las reglas definidas (como email único y formato de teléfono).
+
 
 ### Animales
-- **Registro**:
-  - Solo los administradores pueden registrar nuevos animales en el sistema.
-  - Los datos como el estado (en adopción, apadrinado, etc.) y el tipo de animal (perro, gato) son validados para cumplir con las reglas predefinidas.
-- **Modificación**:
-  - El estado de un animal solo puede ser actualizado por un administrador.
-  - Un animal que está adoptado no puede volver a cambiar su estado a "en adopción".
-- **Consulta**:
-  - Los administradores pueden filtrar animales por tipo o estado para facilitar la gestión interna.
+
+1. Registrar animal (`POST /animales/`):
+
+- Permite a los administradores registrar nuevos animales en el refugio.
+- Validaciones:
+  - Los datos enviados (nombre, tipo, estado) deben cumplir con los valores permitidos.
+  - Un animal no puede registrarse con un estado inválido.
+
+2. Consultar animal por ID (`GET /animales/{id}`):
+
+- Permite obtener información detallada de un animal específico.
+- Validaciones:
+  - Se verifica que el ID proporcionado exista.
+  - Restricciones: Solo administradores tienen acceso.
+
+3. Modificar animal (`PUT /animales/{id}`):
+
+- Permite actualizar los datos de un animal.
+- Validaciones:
+  - Solo los administradores pueden realizar cambios.
+  - Un animal adoptado no puede regresar al estado "en adopción".
+
+4. Consultar animales por estado (`GET /animales?estado={estado}`):
+
+- Permite filtrar animales según su estado (en adopción, apadrinado, etc.).
+- Validaciones:
+  - Se verifica que el estado sea válido.
+  - Restricciones: Solo accesible por administradores.
 
 ### Adopciones
-- **Registro**:
-  - Solo los administradores pueden registrar adopciones.
-  - Antes de realizar una adopción, se valida que el animal esté en el estado "en adopción".
-  - Un usuario no puede adoptar más de una vez al mismo animal.
-- **Consulta**:
-  - Los administradores tienen acceso a todos los registros de adopción.
+
+1. Registrar adopción (`POST /adopciones/`):
+
+- Permite a los administradores registrar una adopción.
+- Validaciones:
+  - Se verifica que el animal esté en estado "en adopción".
+  - Un usuario no puede adoptar al mismo animal más de una vez.
+
+2. Consultar todas las adopciones (`GET /adopciones/`):
+
+- Permite obtener una lista completa de adopciones registradas.
+- Restricciones: Solo accesible por administradores.
 
 ### Validaciones generales
-- Se asegura que los datos enviados en cada solicitud cumplan con los formatos esperados.
-- La existencia de recursos referenciados (como id_usuario o id_animal) es verificada antes de procesar cualquier solicitud para evitar inconsistencias.
+
+- Todos los datos enviados en las solicitudes deben cumplir con las validaciones definidas en los DTOs (como tamaño máximo, campos obligatorios, etc.).
+- Se verifica la existencia de recursos referenciados (como IDs de usuarios o animales) para evitar inconsistencias en la base de datos.
+- Los permisos de acceso están definidos en función del rol del usuario y se validan en cada solicitud.
 
 <hr>
 <br>
@@ -330,27 +436,49 @@ Los ususarios tendran un método C.R.U.D aunque no todos los tipos de usuarios t
 Con estas medidas, se busca ofrecer un entorno seguro para todos los usuarios del sistema, protegiendo tanto la integridad de los datos como la privacidad de los usuarios
 El proyecto utiliza diversas medidas de seguridad para proteger los datos y garantizar un acceso controlado:
 
-### 1. Autenticación mediante JWT:
-- Los usuarios deben autenticarse con sus credenciales (email y contraseña) para obtener un token JWT.
-- El token es necesario para acceder a rutas privadas y realizar operaciones autorizadas.
+### 1. Autenticación mediante JWT (JSON Web Tokens)
+- Los usuarios deben autenticarse con su email y contraseña para obtener un token JWT.
+- Mecanismo:
+  - El token JWT se genera al iniciar sesión correctamente y contiene información básica del usuario, como su ID y rol.
+  - Cada solicitud a rutas protegidas requiere incluir el token JWT en el encabezado de autorización (Authorization: Bearer <token>).
+  - Los tokens tienen una fecha de expiración para limitar su validez temporal (ejemplo: 24 horas).
+  - En caso de cierre de sesión, el token se invalida en el servidor.
 
-### 2. Roles y permisos
-- Cada usuario tiene asignado un rol que define sus permisos dentro del sistema.
-- Los roles determinan qué endpoints y operaciones están disponibles para cada tipo de usuario.
+### 2. Autorización basada en roles
+- Los permisos de acceso a cada endpoint están definidos según el rol del usuario:
+  - Administrador: Tiene acceso total a todos los recursos y operaciones.
+  - Genérico: Tiene acceso limitado a ciertos recursos y no puede realizar modificaciones en la base de datos, excepto en sus propios datos.
+- Cada endpoint verifica el rol del usuario antes de procesar la solicitud, asegurando que solo las personas autorizadas puedan realizar ciertas acciones.
 
-### 3. Validación de entradas
-- Se valida que los datos enviados por el cliente sean correctos, completos y estén en el formato esperado.
-- Se utilizan reglas de validación específicas para evitar datos maliciosos o inconsistentes.
+### 3. Cifrado y seguridad de contraseñas
+- Las contraseñas de los usuarios se almacenan utilizando técnicas de hashing seguro (por ejemplo, BCrypt).
+- Cada contraseña almacenada incluye un "salt" único para prevenir ataques de fuerza bruta o uso de tablas rainbow.
+- Durante la autenticación, la contraseña ingresada se compara con el hash almacenado en la base de datos.
 
-### 4. Restricción de métodos HTTP
-- Cada endpoint está configurado para aceptar solo los métodos HTTP necesarios (por ejemplo, GET, POST, PUT, DELETE).
+### 4. Validación de entradas
+- Se validan los datos enviados por los clientes en cada solicitud:
+  - Datos obligatorios: Campos requeridos para procesar la solicitud (por ejemplo, email y contraseña en el login).
+  - Formato válido: Uso de expresiones regulares y validaciones específicas para garantizar que los datos (como números de teléfono o correos electrónicos) sean correctos.
+  - Prevención de inyección: Todos los datos enviados se parametrizan para evitar ataques de inyección SQL.
 
-### 5. Control de acceso a recursos
-- Los usuarios solo pueden acceder a los datos que les corresponden según sus permisos. Por ejemplo, un usuario genérico no puede acceder a los datos de otros usuarios o animales.
+### 5. Restricción de métodos HTTP
+- Los endpoints solo aceptan los métodos HTTP necesarios:
+- Ejemplo: POST /usuarios/register solo permite solicitudes POST; cualquier otro método generará un error 405 METHOD_NOT_ALLOWED.
 
-### 6. Cifrado
-- Las contraseñas de los usuarios se almacenan en la base de datos como hashes cifrados.
-- Toda la comunicación entre cliente y servidor debe realizarse a través de HTTPS.
+### 6. Uso obligatorio de HTTPS
+- Toda la comunicación entre cliente y servidor debe realizarse a través de HTTPS, garantizando que los datos transmitidos estén cifrados y protegidos contra interceptación.
 
+### 7. Gestión de errores y excepciones
+- Los mensajes de error no exponen información sensible al cliente:
+  - Ejemplo: En lugar de "Usuario no encontrado en la base de datos", se devuelve un mensaje genérico como "El recurso solicitado no existe."
+- Se registra la información completa de cada error en los logs del servidor para facilitar su análisis sin exponer detalles al cliente.
 
+### 8. Prevención de abuso de API
+- Se implementan límites de solicitudes para prevenir ataques de fuerza bruta o abuso:
+  - Ejemplo: Un usuario no autenticado puede intentar iniciar sesión un número limitado de veces por minuto.
+- El servidor responde con un código 429 TOO_MANY_REQUESTS si se exceden los límites configurados.
 
+### 9. Control de acceso a recursos
+- Los usuarios solo pueden acceder a los datos que les corresponden:
+  - Ejemplo: Un usuario genérico no puede acceder a los datos de otros usuarios ni consultar animales adoptados por otras personas.
+  - Los administradores pueden acceder a todos los datos, pero con responsabilidad controlada.
