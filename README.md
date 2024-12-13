@@ -97,6 +97,7 @@ Campos principales:
 - ```nombre```: VARCHAR(100) (NOT NULL).
 - ```tipo_animal```: ENUM (perro, gato) (NOT NULL).
 - ```estado```: ENUM (en adopción, apadrinado, en tratamiento, adoptado) (NOT NULL).
+- ```registro```: LocalDate (NOT NULL);
 
 ### Adopciones
 Campos principales:
@@ -134,6 +135,7 @@ entity "Animales" as Animales {
     + nombre : VARCHAR(100)
     + tipo_animal : ENUM
     + estado : ENUM
+    + registro : LocalDate
 }
 
 entity "Adopciones" as Adopciones {
