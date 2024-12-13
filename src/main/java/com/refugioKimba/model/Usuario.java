@@ -24,6 +24,9 @@ public class Usuario {
     @Column(name = "email", nullable = false, unique = true, length = 255)
     private String email;
 
+    @Column(name = "contraseña", nullable = false)
+    private String contrasenia;
+
     @Column(name = "telefono", length = 9)
     private String telefono;
 
@@ -40,18 +43,20 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(String nombre, String email, String telefono, RolUsuario rol, List<Adopcion> adopciones) {
+    public Usuario(String nombre, String email, String contrasenia, String telefono, RolUsuario rol, List<Adopcion> adopciones) {
         this.nombre = nombre;
         this.email = email;
+        this.contrasenia = contrasenia;
         this.telefono = telefono;
         this.rol = rol;
         this.adopciones = adopciones;
     }
 
-    public Usuario(Long id, String nombre, String email, String telefono, RolUsuario rol, List<Adopcion> adopciones) {
+    public Usuario(Long id, String nombre, String email, String contrasenia, String telefono, RolUsuario rol, List<Adopcion> adopciones) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;
+        this.contrasenia = contrasenia;
         this.telefono = telefono;
         this.rol = rol;
         this.adopciones = adopciones;
@@ -79,6 +84,14 @@ public class Usuario {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getContrasenia() {
+        return contrasenia;
+    }
+
+    public void setContrasenia(String contrasenia) {
+        this.contrasenia = contrasenia;
     }
 
     public String getTelefono() {
