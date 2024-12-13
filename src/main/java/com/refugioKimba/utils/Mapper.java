@@ -1,39 +1,34 @@
 package com.refugioKimba.utils;
 
-import com.refugioKimba.dto.UsuarioDTO;
-import com.refugioKimba.dto.UsuarioLoginDTO;
-import com.refugioKimba.model.Usuario;
 import org.springframework.stereotype.Component;
 
 @Component
 public class Mapper {
 
-    public static Usuario usuarioToDto(UsuarioDTO dto) {
-        if (dto == null) {
+    public <T, D> D entityToDto(T entity, Class<D> dtoClass) {
+        if (entity == null){
             return null;
         }
-        Usuario u = new Usuario();
-        u.setNombre(dto.getNombre());
-        u.setEmail(dto.getEmail());
-        u.setContrasenia(dto.getContrasenia());  // Esto puede incluir hashing más adelante.
-        u.setTelefono(dto.getTelefono());
-        u.setRol(dto.getRol());
-        return u;
-
-    }
-
-    public static UsuarioDTO usuarioToEntity(Usuario usuario) {
-        if (usuario == null) {
+        try {
+            D dto = dtoClass.getDeclaredConstructor().newInstance();
+            return dto;
+        } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
-        UsuarioDTO dto = new UsuarioDTO();
-        dto.setNombre(usuario.getNombre());
-        dto.setEmail(usuario.getEmail());
-        dto.setTelefono(usuario.getTelefono());
-        dto.setRol(usuario.getRol());
-        return dto;
     }
 
-
+    public<T, D> T dtoToEntity( D dto, Class<T> entityClass) {
+        if (dto == null){
+            return null;
+        }
+        try {
+            T entity = entityClass.getDeclaredConstructor().newInstance();
+            return entity;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
 
 }
