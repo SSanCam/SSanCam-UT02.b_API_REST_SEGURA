@@ -40,33 +40,23 @@ public class Usuario {
     public Usuario() {
     }
 
-    public Usuario(String nombre, String email, String telefono, RolUsuario rol) {
+    public Usuario(String nombre, String email, String telefono, RolUsuario rol, List<Adopcion> adopciones) {
         this.nombre = nombre;
         this.email = email;
         this.telefono = telefono;
         this.rol = rol;
+        this.adopciones = adopciones;
     }
 
-    /**
-     * Constructor completo, incluyendo el ID del usuario.
-     *
-     * @param id       El identificador único del usuario.
-     * @param nombre   El nombre del usuario.
-     * @param email    El correo electrónico del usuario.
-     * @param telefono El número de teléfono del usuario.
-     * @param rol      El rol del usuario.
-     */
-    public Usuario(Long id, String nombre, String email, String telefono, RolUsuario rol) {
+    public Usuario(Long id, String nombre, String email, String telefono, RolUsuario rol, List<Adopcion> adopciones) {
         this.id = id;
         this.nombre = nombre;
         this.email = email;
         this.telefono = telefono;
         this.rol = rol;
+        this.adopciones = adopciones;
     }
 
-    /**
-     * Getters & Setters
-     */
     public Long getId() {
         return id;
     }
@@ -105,5 +95,13 @@ public class Usuario {
 
     public void setRol(RolUsuario rol) {
         this.rol = rol;
+    }
+
+    public List<Adopcion> getAdopciones() {
+        return adopciones;
+    }
+
+    public void setAdopciones(List<Adopcion> adopciones) {
+        this.adopciones = adopciones;
     }
 }

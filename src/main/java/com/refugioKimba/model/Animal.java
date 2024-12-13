@@ -29,4 +29,71 @@ public class Animal {
     @OneToOne(mappedBy = "animal")
     private Adopcion adopcion;
 
+    public Animal() {
+    }
+
+    public Animal(String nombre, TipoAnimal tipo, EstadoAnimal estado, LocalDate registro, Adopcion adopcion) {
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.estado = estado;
+        this.registro = registro;
+        this.adopcion = adopcion;
+    }
+
+    public Animal(Long id, String nombre, TipoAnimal tipo, EstadoAnimal estado, LocalDate registro, Adopcion adopcion) {
+        this.id = id;
+        this.nombre = nombre;
+        this.tipo = tipo;
+        this.estado = estado;
+        this.registro = registro;
+        this.adopcion = adopcion;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public TipoAnimal getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoAnimal tipo) {
+        this.tipo = tipo;
+    }
+
+    public EstadoAnimal getEstado() {
+        return estado;
+    }
+
+    public void setEstado(EstadoAnimal estado) {
+        this.estado = estado;
+    }
+
+    public LocalDate getRegistro() {
+        return registro;
+    }
+
+    public void setRegistro(LocalDate registro) {
+        this.registro = registro;
+    }
+
+    public Adopcion getAdopcion() {
+        return adopcion;
+    }
+
+    public void setAdopcion(Adopcion adopcion) {
+        this.adopcion = adopcion;
+    }
 }
