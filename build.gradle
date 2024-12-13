@@ -1,19 +1,34 @@
 plugins {
     id 'java'
+    id 'org.springframework.boot' version '3.1.0' // Asegúrate de ajustar la versión a la que estés utilizando
+    id 'io.spring.dependency-management' version '1.1.0'
 }
 
-group = 'org.example'
-version = '1.0-SNAPSHOT'
+group = 'com.refugioKimba'
+version = '1.0.0-SNAPSHOT'
+sourceCompatibility = '17'
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    // Dependencias necesarias
+    implementation 'org.springframework.boot:spring-boot-starter-web' // Para API REST y servidor embebido
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // Para JPA e Hibernate
+    implementation 'mysql:mysql-connector-java' // Driver para MySQL
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // Para autenticación OAuth2 y JWT
+
+    // Herramientas de desarrollo
+    developmentOnly 'org.springframework.boot:spring-boot-devtools' // LiveReload y reinicio automático
+
+    // Procesador de configuración
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor' // Autocompletado para configuraciones
+
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Pruebas unitarias y de integración
 }
 
-test {
+tasks.named('test') {
     useJUnitPlatform()
 }
