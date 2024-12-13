@@ -14,16 +14,17 @@ public class AnimalDTO {
     public AnimalDTO() {
     }
 
-    public String getNombre() {
-        return nombre;
-    }
-
     public AnimalDTO(String nombre, TipoAnimal tipo, EstadoAnimal estado, LocalDate registro) {
         this.nombre = nombre;
         this.tipo = tipo;
         this.estado = estado;
         this.registro = registro;
     }
+    public String getNombre() {
+        return nombre;
+    }
+
+
 
     public void setNombre(String nombre) {
         this.nombre = nombre;

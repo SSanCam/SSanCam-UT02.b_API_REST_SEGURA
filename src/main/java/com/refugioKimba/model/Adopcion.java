@@ -10,10 +10,10 @@ public class Adopcion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_adopcion")
-    private Long id_adopcion;
+    private Long idAdopcion;
 
     @Column(name = "fecha_adopcion", nullable = false)
-    private Date fecha_adopcion;
+    private Date fechaAdopcion;
 
     @Column(name = "observaciones", nullable = false, length = 255)
     private String observaciones;
@@ -30,35 +30,35 @@ public class Adopcion {
     public Adopcion() {
     }
 
-    public Adopcion(Date fecha_adopcion, String observaciones, Usuario usuario, Animal animal) {
-        this.fecha_adopcion = fecha_adopcion;
+    public Adopcion(Date fechaAdopcion, String observaciones, Usuario usuario, Animal animal) {
+        this.fechaAdopcion = fechaAdopcion;
         this.observaciones = observaciones;
         this.usuario = usuario;
         this.animal = animal;
     }
 
-    public Adopcion(Long id_adopcion, Date fecha_adopcion, String observaciones, Usuario usuario, Animal animal) {
-        this.id_adopcion = id_adopcion;
-        this.fecha_adopcion = fecha_adopcion;
+    public Adopcion(Long idAdopcion, Date fechaAdopcion, String observaciones, Usuario usuario, Animal animal) {
+        this.idAdopcion = idAdopcion;
+        this.fechaAdopcion = fechaAdopcion;
         this.observaciones = observaciones;
         this.usuario = usuario;
         this.animal = animal;
     }
 
-    public Long getId_adopcion() {
-        return id_adopcion;
+    public Long getIdAdopcion() {
+        return idAdopcion;
     }
 
-    public void setId_adopcion(Long id_adopcion) {
-        this.id_adopcion = id_adopcion;
+    public void setIdAdopcion(Long idAdopcion) {
+        this.idAdopcion = idAdopcion;
     }
 
-    public Date getFecha_adopcion() {
-        return fecha_adopcion;
+    public Date getFechaAdopcion() {
+        return fechaAdopcion;
     }
 
-    public void setFecha_adopcion(Date fecha_adopcion) {
-        this.fecha_adopcion = fecha_adopcion;
+    public void setFechaAdopcion(Date fechaAdopcion) {
+        this.fechaAdopcion = fechaAdopcion;
     }
 
     public String getObservaciones() {

@@ -10,7 +10,7 @@ public class Animal {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_animal")
-    private Long id;
+    private Long idAnimal;
 
     @Column(name = "nombre", nullable = false, length = 100)
     private String nombre;
@@ -40,8 +40,8 @@ public class Animal {
         this.adopcion = adopcion;
     }
 
-    public Animal(Long id, String nombre, TipoAnimal tipo, EstadoAnimal estado, LocalDate registro, Adopcion adopcion) {
-        this.id = id;
+    public Animal(Long idAnimal, String nombre, TipoAnimal tipo, EstadoAnimal estado, LocalDate registro, Adopcion adopcion) {
+        this.idAnimal = idAnimal;
         this.nombre = nombre;
         this.tipo = tipo;
         this.estado = estado;
@@ -49,12 +49,12 @@ public class Animal {
         this.adopcion = adopcion;
     }
 
-    public Long getId() {
-        return id;
+    public Long getIdAnimal() {
+        return idAnimal;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setIdAnimal(Long idAnimal) {
+        this.idAnimal = idAnimal;
     }
 
     public String getNombre() {
