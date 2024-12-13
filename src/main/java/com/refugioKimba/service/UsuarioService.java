@@ -2,6 +2,10 @@ package com.refugioKimba.service;
 
 
 import com.refugioKimba.dto.UsuarioDTO;
+import com.refugioKimba.dto.UsuarioRegisterDTO;
+import com.refugioKimba.exception.BadRequestException;
+import com.refugioKimba.exception.DuplicatedException;
+import com.refugioKimba.exception.EntityNotFoundException;
 import com.refugioKimba.interfaces.IUsuarioService;
 import com.refugioKimba.model.Usuario;
 import com.refugioKimba.repository.UsuarioRepository;
@@ -10,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,4 +65,35 @@ public class UsuarioService implements IUsuarioService {
     public void delete(Long id) {
         usuarioRepository.deleteById(id);
     }
+
+    public String login(UsuarioDTO dto) {
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(dto.getEmail());
+
+        if (usuarioOptional.isPresent()) {
+            Usuario usuario = usuarioOptional.get();
+            if (hashedClave.matches(dto.getContrasenia(), usuario.getContrasenia())) {
+                return "Inicio de sesión exitoso";
+            } else {
+                throw new BadRequestException("Contraseña incorrecta.");
+            }
+        }
+        throw new EntityNotFoundException("Usuario no encontrado.");
+    }
+
+    public String register(UsuarioRegisterDTO dto) {
+        Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(dto.getEmail());
+        if (usuarioExistente.isPresent()) {
+            throw new DuplicatedException("El email ya existe.");
+        } else {
+            Usuario nuevoUsuario = new Usuario();
+            nuevoUsuario.setEmail(dto.getEmail());
+            nuevoUsuario.setContrasenia(hashedClave.encode(dto.getContrasenia()));
+            nuevoUsuario.setRol(dto.getRol());
+            nuevoUsuario.setNombre(dto.get);
+            usuarioRepository.save(nuevoUsuario);
+        }
+        return "Usuario creado correctamente";
+    }
+
+
 }
