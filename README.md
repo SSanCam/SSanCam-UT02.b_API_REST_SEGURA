@@ -8,10 +8,10 @@
 <br>
 <br>
 
-a. Nombre del proyecto.
-Refugio Kimba
+# a. Nombre del proyecto.
+### Refugio Kimba
 
-Aplicación web y móvil para la gestión de una protectora de animales.
+* Aplicación web y móvil para la gestión de una protectora de animales.
 
 # b. Idea del Proyecto.
 
