@@ -282,33 +282,6 @@ Los ususarios tendran un método C.R.U.D aunque no todos los tipos de usuarios t
     - **Salida**: 200 OK: JSON con la lista de adopciones.
     - **Excepciones**: 404 Not Found: Registros no encontrados.
 
-### Excepciones genéricas
- 
-Los errores más comunes en el manejo de datos con la base de datos incluyen problemas de validación, autenticación, permisos insuficientes, fallos internos del servidor, etc.
-Los más comunes que nos encontraremos son:
-
-- `400 BAD_REQUEST`: Datos inválidos o faltantes.
-- `401 UNAUTHORIZED`: Falta de autenticación o token inválido.
-- `403 FORBIDDEN`: Permisos insuficientes para realizar esta acción.
-- `404 NOT_FOUND`: Recurso no encontrado.
-- `405 METHOD_NOT_ALLOWED`: Método HTTP no permitido.
-- `409 CONFLICT`: Conflicto con el estado actual del recurso.
-- `422 UNPROCESSABLE_ENTITY`: Datos correctos pero no procesables.
-- `429 TOO_MANY_REQUESTS`: Límite de solicitudes excedido.
-- `500 INTERNAL_SERVER_ERROR`: Error inesperado en el servidor.
-
-En caso de que se produzca una excepción, la API devolverá una respuesta en formato JSON que incluirá detalles sobre el error. Este es un ejemplo para un error `404 NOT_FOUND`:
-
-```json
-{
-  "timestamp": "2024-12-10T12:00:00Z",
-  "status": 404,
-  "error": "Not Found",
-  "message": "El recurso solicitado no existe.",
-  "path": "/usuarios/99"
-}
-```
-
 <hr>
 <br>
 <br>
