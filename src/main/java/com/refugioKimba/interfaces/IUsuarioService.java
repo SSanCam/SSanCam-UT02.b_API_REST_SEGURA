@@ -12,6 +12,6 @@ public interface IUsuarioService {
     List<UsuarioDTO> getAll();
     UsuarioDTO modify(Long id, UsuarioDTO usuarioDTO) throws GeneralException;
     void delete(Long id) throws GeneralException;
-    public String login(UsuarioDTO dto);
-    public String register(UsuarioRegisterDTO dto);
+    public String login(UsuarioDTO dto) throws GeneralException;
+    public String register(UsuarioRegisterDTO dto) throws GeneralException;
 }

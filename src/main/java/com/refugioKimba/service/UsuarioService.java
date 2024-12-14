@@ -106,7 +106,6 @@ public class UsuarioService implements IUsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-
     @Override
     public String login(UsuarioDTO dto) throws GeneralException {
         try {
@@ -168,6 +167,5 @@ public class UsuarioService implements IUsuarioService {
         } catch (Exception e) {
             throw new GeneralException("Error al registrar el usuario. Por favor, intente nuevamente más tarde: " + e.getMessage());
         }
-
     }
 }
