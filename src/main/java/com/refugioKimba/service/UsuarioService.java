@@ -10,7 +10,9 @@ import com.refugioKimba.interfaces.IUsuarioService;
 import com.refugioKimba.model.Usuario;
 import com.refugioKimba.repository.UsuarioRepository;
 import com.refugioKimba.utils.Mapper;
+import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,6 +27,9 @@ public class UsuarioService implements IUsuarioService {
 
     @Autowired
     private Mapper mapper;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Override
     public UsuarioDTO insert(UsuarioDTO usuarioDTO) {
@@ -49,7 +54,7 @@ public class UsuarioService implements IUsuarioService {
 
     @Override
     public UsuarioDTO modify(Long id, UsuarioDTO dto) {
-        Usuario u = usuarioRepository.getById(id);
+        Usuario u = usuarioRepository.getReferenceById(id);
         if (u != null) {
             u.setNombre(dto.getNombre());
             u.setEmail(dto.getEmail());
@@ -63,15 +68,21 @@ public class UsuarioService implements IUsuarioService {
 
     @Override
     public void delete(Long id) {
+        Usuario usuarioExistente = usuarioRepository.findById(id).orElse(null);
+        if (usuarioExistente == null) {
+            throw new EntityNotFoundException("No se ha encontrado el usuario con id: " + id);
+        }
         usuarioRepository.deleteById(id);
     }
 
+
+    @Override
     public String login(UsuarioDTO dto) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(dto.getEmail());
 
         if (usuarioOptional.isPresent()) {
             Usuario usuario = usuarioOptional.get();
-            if (hashedClave.matches(dto.getContrasenia(), usuario.getContrasenia())) {
+            if (passwordEncoder.matches(dto.getContrasenia(), usuario.getContrasenia())) {
                 return "Inicio de sesión exitoso";
             } else {
                 throw new BadRequestException("Contraseña incorrecta.");
@@ -80,20 +91,27 @@ public class UsuarioService implements IUsuarioService {
         throw new EntityNotFoundException("Usuario no encontrado.");
     }
 
+    @Override
     public String register(UsuarioRegisterDTO dto) {
+        EmailValidator emailValidator = EmailValidator.getInstance();
+        if (!emailValidator.isValid(dto.getEmail())) {
+            throw new BadRequestException("El email no es válido.");
+        }
+
         Optional<Usuario> usuarioExistente = usuarioRepository.findByEmail(dto.getEmail());
+
         if (usuarioExistente.isPresent()) {
             throw new DuplicatedException("El email ya existe.");
         } else {
             Usuario nuevoUsuario = new Usuario();
             nuevoUsuario.setEmail(dto.getEmail());
-            nuevoUsuario.setContrasenia(hashedClave.encode(dto.getContrasenia()));
+            nuevoUsuario.setContrasenia(passwordEncoder.encode(dto.getContrasenia()));
             nuevoUsuario.setRol(dto.getRol());
-            nuevoUsuario.setNombre(dto.get);
+            nuevoUsuario.setNombre(dto.getNombre());
+            nuevoUsuario.setTelefono(dto.getTelefono());
             usuarioRepository.save(nuevoUsuario);
         }
         return "Usuario creado correctamente";
     }
-
 
 }
