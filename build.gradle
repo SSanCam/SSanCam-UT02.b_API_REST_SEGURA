@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    id 'org.springframework.boot' version '3.1.0' // Asegúrate de ajustar la versión a la que estés utilizando
+    id 'org.springframework.boot' version '3.1.0'
     id 'io.spring.dependency-management' version '1.1.0'
 }
 
@@ -19,21 +19,27 @@ repositories {
 
 dependencies {
     // Dependencias necesarias
-    implementation 'org.springframework.boot:spring-boot-starter-web' // Para API REST y servidor embebido
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa' // Para JPA e Hibernate
-    implementation 'mysql:mysql-connector-java' // Driver para MySQL
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server' // Para autenticación OAuth2 y JWT
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'mysql:mysql-connector-java'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
+    // JWT
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
+    implementation 'com.nimbusds:nimbus-jose-jwt:9.1.2'
+    implementation 'org.springframework.security:spring-security-oauth2-jose'
+
+    // Validación de email
     implementation 'commons-validator:commons-validator:1.9.0'
 
     // Herramientas de desarrollo
-    developmentOnly 'org.springframework.boot:spring-boot-devtools' // LiveReload y reinicio automático
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     // Procesador de configuración
-    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor' // Autocompletado para configuraciones
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
 
     // Testing
-    testImplementation 'org.springframework.boot:spring-boot-starter-test' // Pruebas unitarias y de integración
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }
 
 tasks.named('test') {
