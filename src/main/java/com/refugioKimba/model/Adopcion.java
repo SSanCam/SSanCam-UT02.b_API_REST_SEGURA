@@ -1,7 +1,8 @@
 package com.refugioKimba.model;
 
 import jakarta.persistence.*;
-import java.util.Date;
+
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "adopciones")
@@ -13,7 +14,7 @@ public class Adopcion {
     private Long idAdopcion;
 
     @Column(name = "fecha_adopcion", nullable = false)
-    private Date fechaAdopcion;
+    private LocalDate fechaAdopcion;
 
     @Column(name = "observaciones", nullable = false, length = 255)
     private String observaciones;
@@ -30,14 +31,14 @@ public class Adopcion {
     public Adopcion() {
     }
 
-    public Adopcion(Date fechaAdopcion, String observaciones, Usuario usuario, Animal animal) {
+    public Adopcion(LocalDate fechaAdopcion, String observaciones, Usuario usuario, Animal animal) {
         this.fechaAdopcion = fechaAdopcion;
         this.observaciones = observaciones;
         this.usuario = usuario;
         this.animal = animal;
     }
 
-    public Adopcion(Long idAdopcion, Date fechaAdopcion, String observaciones, Usuario usuario, Animal animal) {
+    public Adopcion(Long idAdopcion, LocalDate fechaAdopcion, String observaciones, Usuario usuario, Animal animal) {
         this.idAdopcion = idAdopcion;
         this.fechaAdopcion = fechaAdopcion;
         this.observaciones = observaciones;
@@ -53,11 +54,11 @@ public class Adopcion {
         this.idAdopcion = idAdopcion;
     }
 
-    public Date getFechaAdopcion() {
+    public LocalDate getFechaAdopcion() {
         return fechaAdopcion;
     }
 
-    public void setFechaAdopcion(Date fechaAdopcion) {
+    public void setFechaAdopcion(LocalDate fechaAdopcion) {
         this.fechaAdopcion = fechaAdopcion;
     }
 
