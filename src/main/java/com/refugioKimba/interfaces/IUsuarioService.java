@@ -2,15 +2,16 @@ package com.refugioKimba.interfaces;
 
 import com.refugioKimba.dto.UsuarioDTO;
 import com.refugioKimba.dto.UsuarioRegisterDTO;
+import com.refugioKimba.exception.GeneralException;
 
 import java.util.List;
 
 public interface IUsuarioService {
-    UsuarioDTO insert(UsuarioDTO usuarioDTO);
-    UsuarioDTO getById(Long id);
+    UsuarioDTO insert(UsuarioDTO usuarioDTO) throws GeneralException;
+    UsuarioDTO getById(Long id) throws GeneralException;
     List<UsuarioDTO> getAll();
-    UsuarioDTO modify(Long id, UsuarioDTO usuarioDTO);
-    void delete(Long id);
+    UsuarioDTO modify(Long id, UsuarioDTO usuarioDTO) throws GeneralException;
+    void delete(Long id) throws GeneralException;
     public String login(UsuarioDTO dto);
     public String register(UsuarioRegisterDTO dto);
 }
