@@ -3,6 +3,7 @@ package com.refugioKimba.controller;
 import com.refugioKimba.dto.UsuarioDTO;
 import com.refugioKimba.dto.UsuarioRegisterDTO;
 import com.refugioKimba.exception.GeneralException;
+import com.refugioKimba.service.TokenService;
 import com.refugioKimba.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private TokenService tokenService;
 
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMINISTRADOR')")

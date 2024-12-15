@@ -12,7 +12,6 @@ java {
     targetCompatibility = '17'
 }
 
-
 repositories {
     mavenCentral()
 }
@@ -21,12 +20,10 @@ dependencies {
     // Dependencias necesarias
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-    implementation 'mysql:mysql-connector-java:17.0.0.1'
+    implementation 'mysql:mysql-connector-java:8.0.30'
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-
     // JWT
-    implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
-    implementation 'com.nimbusds:nimbus-jose-jwt:9.1.2'
+    implementation 'io.jsonwebtoken:jjwt:0.12.0'
     implementation 'org.springframework.security:spring-security-oauth2-jose'
 
     // Validación de email

@@ -32,6 +32,9 @@ public class UsuarioService implements IUsuarioService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private TokenService tokenService;
+
     @Override
     public UsuarioDTO insert(UsuarioDTO usuarioDTO) throws GeneralException {
         if (usuarioDTO == null) {
@@ -75,16 +78,21 @@ public class UsuarioService implements IUsuarioService {
     @Override
     public UsuarioDTO modify(Long id, UsuarioDTO dto) throws GeneralException {
         try {
-            Usuario u = usuarioRepository.getReferenceById(id);
-            if (u != null) {
-                u.setNombre(dto.getNombre());
-                u.setEmail(dto.getEmail());
-                u.setTelefono(dto.getTelefono());
-                u.setRol(dto.getRol());
-                u.setContrasenia(dto.getContrasenia());
-                return mapper.entityToDto(u, UsuarioDTO.class);
+            Usuario u = usuarioRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Usuario no encontrado para modificar"));
+
+            u.setNombre(dto.getNombre());
+            u.setEmail(dto.getEmail());
+            u.setTelefono(dto.getTelefono());
+            u.setRol(dto.getRol());
+            u.setContrasenia(dto.getContrasenia());
+
+            if (dto.getContrasenia() != null && !dto.getContrasenia().isEmpty()){
+                u.setContrasenia(passwordEncoder.encode(dto.getContrasenia()));
             }
-            throw new EntityNotFoundException("Usuario no encontrado para modificar");
+
+            Usuario usuarioModificado = usuarioRepository.save(u);
+            return mapper.entityToDto(usuarioModificado, UsuarioDTO.class);
+
         } catch (Exception e) {
             throw new GeneralException("Error al modificar el usuario: " + e.getMessage());
         }
@@ -103,7 +111,6 @@ public class UsuarioService implements IUsuarioService {
         } catch (Exception e) {
             throw new GeneralException("Error al eliminar el usuario: " + e.getMessage());
         }
-        usuarioRepository.deleteById(id);
     }
 
     @Override
@@ -114,7 +121,7 @@ public class UsuarioService implements IUsuarioService {
             if (usuarioOptional.isPresent()) {
                 Usuario usuario = usuarioOptional.get();
                 if (passwordEncoder.matches(dto.getContrasenia(), usuario.getContrasenia())) {
-                    return "Inicio de sesión exitoso";
+                    return tokenService.generateToken(usuario);
                 } else {
                     throw new BadRequestException("Contraseña incorrecta.");
                 }

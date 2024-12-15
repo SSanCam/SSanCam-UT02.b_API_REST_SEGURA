@@ -2,10 +2,10 @@ package com.refugioKimba.service;
 
 import com.refugioKimba.model.Usuario;
 import com.refugioKimba.security.RsaKeyProperties;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.stereotype.Service;
+import io.jsonwebtoken.Jwts;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -29,15 +29,15 @@ public class TokenService {
                 .setIssuedAt(now)
                 .setExpiration(expirationDate)
                 .claim("role", usuario.getRol()) // Agregar el rol al token
-                .signWith(getPrivateKey(), SignatureAlgorithm.RS256)
+                .signWith(getPrivateKey())
                 .compact();
     }
 
     // Método para validar el token JWT
     public Boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder()
-                    .setSigningKey(getPublicKey())
+            Jwts.builder()
+                    .se(getPublicKey())
                     .build()
                     .parseClaimsJws(token);
             return true;
