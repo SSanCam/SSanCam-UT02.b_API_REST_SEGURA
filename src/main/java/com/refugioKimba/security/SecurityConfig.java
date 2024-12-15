@@ -16,7 +16,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -30,7 +29,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     @Autowired
-    private RsaKeyProperties rsaKeys;
+    private RsaKeyProperties rsaKeyProperties;
 
     @Value("classpath:certs/public.pem")
     private Resource publicKeyResource;
@@ -43,30 +42,22 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Rutas públicas
-                        .requestMatchers(HttpMethod.POST, "/usuarios/login", "/usuarios/register").permitAll()
-
-                        // Rutas de Usuarios
-                        .requestMatchers(HttpMethod.GET, "/usuarios/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/usuarios").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/usuarios/{id}").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, "/usuarios/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/usuarios/{id}").hasRole("ADMIN")
-
-                        // Rutas de Animales
-                        .requestMatchers(HttpMethod.POST, "/animales/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/animales/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/animales").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/animales/{id}").hasRole("ADMIN")
-
-                        // Rutas de Adopciones
-                        .requestMatchers(HttpMethod.POST, "/adopciones/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/adopciones/").hasRole("ADMIN")
-
+                        .requestMatchers(HttpMethod.POST, "/usuarios/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuarios/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/usuarios/{id}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/usuarios").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/{id}").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/usuarios/").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.DELETE, "/usuarios/{id}").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, "/animales/").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.GET, "/animales/{id}").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.GET, "/animales").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.PUT, "/animales/{id}").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, "/adopciones/").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.GET, "/adopciones/").hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated()
                 )
-                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder()))) // Correcta configuración de JWT
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())))
                 .build();
     }
 
@@ -76,19 +67,21 @@ public class SecurityConfig {
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    @Bean
     public JwtDecoder jwtDecoder() {
-        return NimbusJwtDecoder.withPublicKey(rsaKeys.publicKey()).build();
+        return NimbusJwtDecoder.withPublicKey(rsaKeyProperties.getPublicKey()).build();
     }
 
     @Bean
     public JwtEncoder jwtEncoder() {
-        JWK jwk = new RSAKey.Builder(rsaKeys.publicKey()).privateKey(rsaKeys.privateKey()).build();
+        JWK jwk = new RSAKey.Builder(rsaKeyProperties.getPublicKey())
+                .privateKey(rsaKeyProperties.getPrivateKey())
+                .build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }

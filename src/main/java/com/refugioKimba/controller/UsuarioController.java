@@ -1,13 +1,17 @@
 package com.refugioKimba.controller;
 
 import com.refugioKimba.dto.UsuarioDTO;
+import com.refugioKimba.dto.UsuarioLoginDTO;
 import com.refugioKimba.dto.UsuarioRegisterDTO;
+import com.refugioKimba.exception.BadRequestException;
 import com.refugioKimba.exception.GeneralException;
 import com.refugioKimba.service.TokenService;
 import com.refugioKimba.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +24,9 @@ public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
     @Autowired
     private TokenService tokenService;
@@ -46,7 +53,7 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GENERIC')")
+    @PreAuthorize("hasRole('ADMINISTRADOR') or hasRole('GENERICO')")
     public ResponseEntity<UsuarioDTO> modify(
             @PathVariable Long id,
             @RequestBody UsuarioDTO usuarioDTO
@@ -71,8 +78,21 @@ public class UsuarioController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody UsuarioDTO usuarioDTO) throws GeneralException {
-        String token = usuarioService.login(usuarioDTO);
+    public ResponseEntity<String> login(@RequestBody UsuarioLoginDTO usuarioLoginDTO) throws GeneralException {
+        // Intentamos autenticar al usuario
+        Authentication authentication = null;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(usuarioLoginDTO.getEmail(), usuarioLoginDTO.getContrasenia())
+            );
+        } catch (Exception e) {
+            throw new BadRequestException("Credenciales incorrectas.");
+        }
+
+        // Generamos el token
+        String token = tokenService.generateToken(authentication);
+
+        // Retornamos el token
         return ResponseEntity.ok(token);
     }
 

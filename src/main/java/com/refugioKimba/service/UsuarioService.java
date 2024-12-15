@@ -2,19 +2,22 @@ package com.refugioKimba.service;
 
 
 import com.refugioKimba.dto.UsuarioDTO;
+import com.refugioKimba.dto.UsuarioLoginDTO;
 import com.refugioKimba.dto.UsuarioRegisterDTO;
-import com.refugioKimba.exception.BadRequestException;
-import com.refugioKimba.exception.DuplicatedException;
-import com.refugioKimba.exception.EntityNotFoundException;
-import com.refugioKimba.exception.GeneralException;
+import com.refugioKimba.exception.*;
 import com.refugioKimba.interfaces.IUsuarioService;
 import com.refugioKimba.model.Usuario;
 import com.refugioKimba.repository.UsuarioRepository;
 import com.refugioKimba.utils.Mapper;
 import org.apache.commons.validator.routines.EmailValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,13 +27,21 @@ import java.util.stream.Collectors;
 public class UsuarioService implements IUsuarioService {
 
     @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
     private Mapper mapper;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private TokenService tokenService;
@@ -114,27 +125,54 @@ public class UsuarioService implements IUsuarioService {
     }
 
     @Override
-    public String login(UsuarioDTO dto) throws GeneralException {
+    @PostMapping("/login")
+    public String login(
+            @RequestBody UsuarioLoginDTO usuarioLoginDTO
+    ) {
+        Authentication authentication = null;
+        try {
+            authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(usuarioLoginDTO.getEmail(), usuarioLoginDTO.getContrasenia())// modo de autenticación
+            );
+        } catch (Exception e) {
+            System.out.println("Excepcion en authentication");
+            throw new BadRequestException("Credenciales del usuario incorrectas");
+        }
+
+        String token = "";
+        try {
+            token = tokenService.generateToken(authentication);
+        } catch (Exception e) {
+            System.out.println("Excepcion en generar token");
+            throw new InternalServerErrorException("Error al generar el token de autenticación");
+        }
+        return token;
+
+    }
+    /*
+    @Override
+    public String login(UsuarioLoginDTO dto) throws GeneralException {
         try {
             Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(dto.getEmail());
 
             if (usuarioOptional.isPresent()) {
                 Usuario usuario = usuarioOptional.get();
+                // Verificar si la contraseña coincide
                 if (passwordEncoder.matches(dto.getContrasenia(), usuario.getContrasenia())) {
+                    // Si la autenticación es exitosa, generar el token
                     return tokenService.generateToken(usuario);
                 } else {
                     throw new BadRequestException("Contraseña incorrecta.");
                 }
+            } else {
+                throw new EntityNotFoundException("Usuario no encontrado.");
             }
-            throw new EntityNotFoundException("Usuario no encontrado.");
-        } catch (BadRequestException e) {
-            throw new BadRequestException("Contraseña incorrecta.");
-        } catch (EntityNotFoundException e) {
-            throw new EntityNotFoundException("Usuario no encontrado.");
         } catch (Exception e) {
             throw new GeneralException("Error al intentar iniciar sesión: " + e.getMessage());
         }
     }
+     */
+
 
     @Override
     public String register(UsuarioRegisterDTO dto) throws GeneralException {
