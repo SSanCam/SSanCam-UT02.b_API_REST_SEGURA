@@ -34,18 +34,19 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.POST, "/usuarios/login", "/usuarios/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/usuarios/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/usuarios").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/usuarios/register").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/usuarios/login").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/usuarios/{id}").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/usuarios").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/usuarios/{id}").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/usuarios/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/usuarios/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/animales/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/animales/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/animales").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/animales/{id}").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/adopciones/").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.GET, "/adopciones/").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/usuarios/").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.DELETE, "/usuarios/{id}").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, "/animales/").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.GET, "/animales/{id}").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.GET, "/animales").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.PUT, "/animales/{id}").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.POST, "/adopciones/").hasRole("ADMINISTRADOR")
+                        .requestMatchers(HttpMethod.GET, "/adopciones/").hasRole("ADMINISTRADOR")
                         .anyRequest().authenticated()
                 )
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(jwt -> jwt.decoder(jwtDecoder())))
@@ -55,11 +56,6 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
     }
 
     @Bean
@@ -74,5 +70,10 @@ public class SecurityConfig {
                 .build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
     }
 }
