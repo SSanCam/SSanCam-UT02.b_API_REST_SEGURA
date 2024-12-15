@@ -7,8 +7,10 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -23,12 +25,25 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
+import java.nio.file.Files;
+import java.security.KeyFactory;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired
     private RsaKeyProperties rsaKeys;
+
+    @Value("classpath:src/main/resources/certs/public.pem")
+    private Resource publicKeyResource;
+
+    @Value("classpath:src/main/resources/certs/private.pem")
+    private Resource privateKeyResource;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -41,7 +56,7 @@ public class SecurityConfig {
                         // Rutas de Usuarios
                         .requestMatchers(HttpMethod.GET, "/usuarios/{id}").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/usuarios").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/usuarios/{id}").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.PUT, "/usuarios/{id}").authenticated()
                         .requestMatchers(HttpMethod.POST, "/usuarios/").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/usuarios/{id}").hasRole("ADMIN")
 
@@ -82,5 +97,22 @@ public class SecurityConfig {
         JWK jwk = new RSAKey.Builder(rsaKeys.publicKey()).privateKey(rsaKeys.privateKey()).build();
         JWKSource<SecurityContext> jwks = new ImmutableJWKSet<>(new JWKSet(jwk));
         return new NimbusJwtEncoder(jwks);
+    }
+
+    @Bean
+    public RSAPublicKey publicKey() throws Exception {
+        byte[] publicKeyBytes = Files.readAllBytes(publicKeyResource.getFile().toPath());
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(publicKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return (RSAPublicKey) keyFactory.generatePublic(keySpec);
+    }
+
+    // Crea el bean para la clave privada
+    @Bean
+    public RSAPrivateKey privateKey() throws Exception {
+        byte[] privateKeyBytes = Files.readAllBytes(privateKeyResource.getFile().toPath());
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
     }
 }

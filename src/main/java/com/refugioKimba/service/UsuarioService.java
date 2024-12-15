@@ -23,14 +23,18 @@ import java.util.stream.Collectors;
 @Service
 public class UsuarioService implements IUsuarioService {
 
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
+        this.passwordEncoder = passwordEncoder;
+    }
+
     @Autowired
     private UsuarioRepository usuarioRepository;
 
     @Autowired
     private Mapper mapper;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private TokenService tokenService;
