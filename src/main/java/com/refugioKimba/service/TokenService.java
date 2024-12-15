@@ -47,11 +47,9 @@ public class TokenService {
 
     // Obtener la clave privada para firmar el token
     private PrivateKey getPrivateKey() {
-        return rsaKeyProperties.privateKey();
-    }
+        return rsaKeyProperties.getPrivateKey();    }
 
     // Obtener la clave pública para validar el token
     private PublicKey getPublicKey() {
-        return rsaKeyProperties.publicKey();
-    }
+        return rsaKeyProperties.getPublicKey();    }
 }
