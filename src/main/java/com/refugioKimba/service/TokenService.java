@@ -2,10 +2,9 @@ package com.refugioKimba.service;
 
 import com.refugioKimba.model.Usuario;
 import com.refugioKimba.security.RsaKeyProperties;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
-import org.springframework.stereotype.Service;
 import io.jsonwebtoken.Jwts;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -36,8 +35,8 @@ public class TokenService {
     // Método para validar el token JWT
     public Boolean validateToken(String token) {
         try {
-            Jwts.builder()
-                    .se(getPublicKey())
+            Jwts.parser()
+                    .setSigningKey(getPublicKey())
                     .build()
                     .parseClaimsJws(token);
             return true;
