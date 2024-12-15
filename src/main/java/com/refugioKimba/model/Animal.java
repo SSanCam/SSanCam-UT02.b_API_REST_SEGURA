@@ -16,7 +16,7 @@ public class Animal {
     private String nombre;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "tipo", nullable = false)
+    @Column(name = "tipo_animal", nullable = false)
     private TipoAnimal tipo;
 
     @Enumerated(EnumType.STRING)
